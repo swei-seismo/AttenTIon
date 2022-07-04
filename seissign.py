@@ -31,7 +31,7 @@ def polyodr(x,y,n,verbose=False,itmax=200):
     # Display results:
     if verbose: fit.pprint()
     if fit.stopreason[0] == 'Iteration limit reached':
-        print '(WWW) poly_lsq: Iteration limit reached, result not reliable!'
+        print('(WWW) poly_lsq: Iteration limit reached, result not reliable!')
     # Results and errors
     coeff = fit.beta[::-1]
     err   = fit.res_var
@@ -72,7 +72,7 @@ def taper(data0,width=0.05,ttype='hanning',side='both'):
     if width>=0 and width < 0.5:
         wlen=int(npts*width)
     else:
-        raise ValueError, "taper width should between 0.0 and 0.5"
+        raise ValueError("taper width should between 0.0 and 0.5")
     if ttype=='hanning':
         window = np.hanning(2*wlen)
     elif ttype=='hamming':
@@ -80,7 +80,7 @@ def taper(data0,width=0.05,ttype='hanning',side='both'):
     elif ttype=='blackman':
         window = np.blackman(2*wlen)
     else:
-        raise ValueError, "taper type needs to be hanning/hamming/blackman"
+        raise ValueError("taper type needs to be hanning/hamming/blackman")
     if side == 'left':
         taper = np.hstack((window[:wlen], np.ones(npts - wlen)))
     elif side == 'right':
@@ -109,7 +109,7 @@ def spec(data,dt,maxfreq=0,stype='amp'):
     elif stype=='phase':
         spec=(np.angle(np.fft.fft(data)))*dt
     else:
-        raise ValueError, "Spectrum type: amp/power/phase"
+        raise ValueError("Spectrum type: amp/power/phase")
     ind=np.argsort(freq)
     freq=freq[ind]
     spec=spec[ind]
@@ -121,13 +121,13 @@ def spec(data,dt,maxfreq=0,stype='amp'):
 
 def smooth(x,window_len,window='hanning'):
     if x.ndim != 1:
-        raise ValueError, "smooth only accepts 1 dimension arrays."
+        raise ValueError("smooth only accepts 1 dimension arrays.")
     if x.size < window_len:
-        raise ValueError, "Input vector needs to be bigger than window size."
+        raise ValueError("Input vector needs to be bigger than window size.")
     if window_len<3:
         return x
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+        raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
     if window_len % 2 ==0:
         window_len = window_len + 1
     s=np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
@@ -137,5 +137,5 @@ def smooth(x,window_len,window='hanning'):
     else:
         w=eval('np.'+window+'(window_len)')
     y=np.convolve(w/w.sum(),s,mode='valid')
-    return y[(window_len/2):-(window_len/2)]
+    return y[int(window_len/2):-int(window_len/2)]
 
