@@ -487,8 +487,6 @@ for ior in range(len(oridlst)):
         saving[sta][2]['misfit']=[np.sqrt(var*(ndat-2))/ndat]
         saving[sta][2]['err']=[np.sqrt(var*GP2inv.diagonal()[ista+1])] ## cov(m)=cov(d)inv(G'G) FOR OVERDETERMINED PROBLEM
         saving[sta][2]['aveATTEN']=[(1000*tstarP[ista]/saving[sta]['Ptt'])]
-#         saving[sta][2]['resspec']=tstarsub.calresspec(saving[sta],sta,orid,'P',lnmomenP,
-#                                                      bestfcp,bestalpha,2)
         if saving[sta][2]['good'][0]:
             pfitting=tstarsub.fitting(saving[sta],sta,orid,'P',lnmomenP,
                               bestfcp,bestalpha,2)
@@ -538,8 +536,6 @@ for ior in range(len(oridlst)):
         saving[sta][3]['misfit']=[np.sqrt(var*(ndat-2))/ndat]
         saving[sta][3]['err']=[np.sqrt(var*GP3inv.diagonal()[ista+1])] ## cov(m)=cov(d)inv(G'G) FOR OVERDETERMINED PROBLEM
         saving[sta][3]['aveATTEN']=[(1000*tstarP[ista]/saving[sta]['Ptt'])]
-        saving[sta][3]['resspec']=tstarsub.calresspec(saving[sta],sta,orid,'P',lnmomenP,
-                                                     bestfcp,bestalpha)
         k1=k2
 ###### 3 MEANS INVERTING AGAIN WITHOUT misfit>1 ######
     
@@ -547,12 +543,6 @@ for ior in range(len(oridlst)):
     momenP=np.exp(lnmomenP)
     Mw=float(2.0/3.0*np.log10(momenP*1e7)-10.73)
     logfl.write('Mw = %.2f, Mwisc = %.2f\n' % (Mw,Mwisc))
-
-    ## OUTPUT RESIDUAL SPECTRA FOR SITE EFFECTS
-    for icntp in range(len(staP3lst)):
-        sta=staP3lst[icntp]
-        sitefl=resultdir+'/%s_%d_resspec_%s.dat' % (subdb,orid,sta)
-        np.savetxt(sitefl,saving[sta][3]['resspec'], fmt='%10.4f  %15.8e  %6.2f\n')
 
     ## OUTPUT RESULTS FOR TOMOGRAPHY
     ftstar=open(resultdir+'/%s_%d_pstar%03d.dat' % (subdb,orid,int(alpha[0]*100)),'w')

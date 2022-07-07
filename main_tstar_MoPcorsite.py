@@ -37,23 +37,23 @@ dt=0.025
 beta=4000       ## SHEAR VELOCITY IN m/s FOR APPROXIMATING CORNER FREQUENCY
 doplotseis=False
 doplotsnr=False
-doplotspec=True
+doplotspec=False
 doplotfcts=False
-doplotfcall=True
+doplotfcall=False
 
-# s=raw_input('Please input subdb and workdir: ')
-# subdb=s.split()[0]
-# workdir=s.split()[1]
-# alpha=[float(s.split()[2])]
-# fcps=float(s.split()[3])
-# doplotspec=bool(int(s.split()[4]))
-# doplotspec=False
-# print('input:',alpha,fcps,doplotspec)
+s=raw_input('Please input subdb and workdir: ')
+subdb=s.split()[0]
+workdir=s.split()[1]
+alpha=[float(s.split()[2])]
+fcps=float(s.split()[3])
+doplotspec=bool(int(s.split()[4]))
+doplotspec=False
+print('input:',alpha,fcps,doplotspec)
 
-subdb='4'
-workdir='/mnt/home/swei/LauQtomo/testtstar_site'
-alpha=[0.27]
-fcps=1.0        ## fc(P)/fc(S)
+#subdb='3'
+#workdir='/mnt/home/swei/LauQtomo/testtstar_site'
+#alpha=[0.27]
+#fcps=1.0        ## fc(P)/fc(S)
 
 evlst='/mnt/home/swei/LauQtomo/input/eventid_sub%s.lst' % subdb
 oridlst=[int(line.split()[0]) for line in open(evlst).readlines()[1:]]
@@ -79,20 +79,21 @@ if not os.path.isdir(resultdir):
 
 ########## READ SITE EFFECTS ############
 sitedir='/mnt/home/swei/LauQtomo/sitespec'
-allsite={}
+allPsite={}
 sitefllst=glob.glob(sitedir+'/Psite*.spec')
 for isite in range(len(sitefllst)):
     sitefl=sitefllst[isite]
     stn=os.path.basename(sitefl)
-    stn=stn.split('.')[0][5:]
+    stn=stn.split('.')[0][6:]
     sitedata=np.loadtxt(sitefl)
     sitedata=np.nan_to_num(sitedata)
     allPsite[stn]=sitedata
+allSsite={}
 sitefllst=glob.glob(sitedir+'/Ssite*.spec')
 for isite in range(len(sitefllst)):
     sitefl=sitefllst[isite]
     stn=os.path.basename(sitefl)
-    stn=stn.split('.')[0][5:]
+    stn=stn.split('.')[0][6:]
     sitedata=np.loadtxt(sitefl)
     sitedata=np.nan_to_num(sitedata)
     allSsite[stn]=sitedata
@@ -109,12 +110,12 @@ alltS=0
 ##ORID NUMBER
 for ior in range(len(oridlst)):
     orid=oridlst[ior]
-    if orid!=54521:
-        continue
+#   if orid!=52271:
+#      continue
     resultfl=resultdir+'/%s_%d_pstar%03d.dat' % (subdb,orid,int(alpha[0]*100))
-#     if os.path.isfile(resultfl):
-#         print('Skip %d, already exists' % orid)
-#         continue
+    if os.path.isfile(resultfl):
+        print('Skip %d, already exists' % orid)
+        continue
     for delvar in ['Gp1','Gp2','datap1','datapf1','datap2','datapf2','resultP',
                    'Gs1','Gs2','datas1','datasf1','datas2','datasf2','resultS','findres']:
         if delvar in globals():
@@ -499,6 +500,8 @@ for ior in range(len(oridlst)):
     lnmomenPerr=np.sqrt(vardatP2*GP2inv[0][0])
     ## ESTIMATE t* ERRORS BASED ON DATA VARIANCES FOR EACH t*
     estdataP=np.dot(GP2[:,:,ialco],modelP)
+    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE norm^2/(size_all-num_stad_so_far-1)
+    var=(residuP**2)/(dataP2.size-len(staP2lst)-2)
     staP3lst=[]
     k1=0
     for ista in range(len(staP2lst)):
@@ -507,9 +510,9 @@ for ior in range(len(oridlst)):
         k2=k1+ndat
         dat=dataP2[k1:k2]
         est=estdataP[k1:k2]
-##        saving[sta][2]['est']=[est]
-##        saving[sta][2]['dat']=[dat]
-        var=(np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+# ##        saving[sta][2]['est']=[est]
+# ##        saving[sta][2]['dat']=[dat]
+#        var=(np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
         saving[sta][2]['tstar']=[tstarP[ista]]
         saving[sta][2]['misfit']=[np.sqrt(var*(ndat-2))/ndat]
         saving[sta][2]['err']=[np.sqrt(var*GP2inv.diagonal()[ista+1])] ## cov(m)=cov(d)inv(G'G) FOR OVERDETERMINED PROBLEM
@@ -548,6 +551,8 @@ for ior in range(len(oridlst)):
     lnmomenPerr=np.sqrt(vardatP3*GP3inv[0][0])
     ## ESTIMATE t* ERRORS BASED ON DATA VARIANCES FOR EACH t*
     estdataP=np.dot(GP3[:,:,ialco],modelP)
+    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE norm^2/(size_all-num_stad_so_far-1)
+    var=(residuP**2)/(dataP3.size-len(staP3lst)-2)
     k1=0
     for ista in range(len(staP3lst)):
         sta=staP3lst[ista]
@@ -555,7 +560,7 @@ for ior in range(len(oridlst)):
         k2=k1+ndat
         dat=dataP3[k1:k2]
         est=estdataP[k1:k2]
-        var=(np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+#        var=(np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
         saving[sta][3]={}
 ##        saving[sta][3]['est']=[est]
 ##        saving[sta][3]['dat']=[dat]
@@ -563,8 +568,8 @@ for ior in range(len(oridlst)):
         saving[sta][3]['misfit']=[np.sqrt(var*(ndat-2))/ndat]
         saving[sta][3]['err']=[np.sqrt(var*GP3inv.diagonal()[ista+1])] ## cov(m)=cov(d)inv(G'G) FOR OVERDETERMINED PROBLEM
         saving[sta][3]['aveATTEN']=[(1000*tstarP[ista]/saving[sta]['Ptt'])]
-        saving[sta][3]['resspec']=[tstarsub.calresspec(saving[sta],sta,orid,'P',lnmomenP,
-                                                     bestfcp,bestalpha)]
+        saving[sta][3]['Presspec']=tstarsub.calresspec(saving[sta],sta,orid,'P',lnmomenP,
+                                                     bestfcp,bestalpha)
         k1=k2
 ###### 3 MEANS INVERTING AGAIN WITHOUT misfit>1 ######
     
@@ -577,7 +582,7 @@ for ior in range(len(oridlst)):
     for icntp in range(len(staP3lst)):
         sta=staP3lst[icntp]
         sitefl=resultdir+'/%s_%d_Presspec_%s.dat' % (subdb,orid,sta)
-        np.savetxt(sitefl,saving[sta][3]['resspec'][0], fmt='%10.4f  %15.8e  %6.2f')
+        np.savetxt(sitefl,saving[sta][3]['Presspec'], fmt='%10.4f  %15.8e  %6.2f')
 
     ## OUTPUT RESULTS FOR TOMOGRAPHY
     ftstar=open(resultdir+'/%s_%d_pstar%03d.dat' % (subdb,orid,int(alpha[0]*100)),'w')
@@ -599,7 +604,7 @@ for ior in range(len(oridlst)):
         for sta in staP3lst:
             if saving[sta][2]['good'][0]:
                 print('Plotting P spectrum of ' + sta)
-                if sta in allsite.keys():
+                if sta in allPsite.keys():
                     sitedata=allPsite[sta][:,1]
                 else:
                     sitedata=0
@@ -640,6 +645,8 @@ for ior in range(len(oridlst)):
         ferr.close()
         ## ESTIMATE t* ERRORS BASED ON DATA VARIANCES FOR EACH t*
         estdataS=np.dot(GS2[:,:,ialco],modelS)
+        ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE norm^2/(size_all-num_stad_so_far-1)
+        var=(residuS**2)/(dataS2.size-len(staS2lst)-2)
         staS3lst=[]
         k1=0
         for ista in range(len(staS2lst)):
@@ -648,10 +655,10 @@ for ior in range(len(oridlst)):
             k2=k1+ndat
             dat=dataS2[k1:k2]
             est=estdataS[k1:k2]
-##            saving[sta][2]['est'].append(est)
-##            saving[sta][2]['dat'].append(dat)
-##            var=(np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
-            var=(np.linalg.norm(dat-est)**2)/(ndat-1)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+# ##            saving[sta][2]['est'].append(est)
+# ##            saving[sta][2]['dat'].append(dat)
+# ##            var=(np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+#            var=(np.linalg.norm(dat-est)**2)/(ndat-1)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
             saving[sta][2]['tstar'].append(tstarS[ista])
             saving[sta][2]['misfit'].append(np.sqrt(var*(ndat-1))/ndat)
 ##            saving[sta][2]['err'].append(np.sqrt(var*GS2inv.diagonal()[ista-1])) ## cov(m)=cov(d)inv(G'G) FOR OVERDETERMINED PROBLEM
@@ -691,6 +698,8 @@ for ior in range(len(oridlst)):
 ##        alltS=alltS+1
         ## ESTIMATE t* ERRORS BASED ON DATA VARIANCES FOR EACH t*
         estdataS=np.dot(GS3[:,:,ialco],modelS)
+        ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE norm^2/(size_all-num_stad_so_far-1)
+        var=(residuS**2)/(dataS3.size-len(staS3lst)-2)
         k1=0
         for ista in range(len(staS3lst)):
             sta=staS3lst[ista]
@@ -698,7 +707,7 @@ for ior in range(len(oridlst)):
             k2=k1+ndat
             dat=dataS3[k1:k2]
             est=estdataS[k1:k2]
-            var=(np.linalg.norm(dat-est)**2)/(ndat-1)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+#            var=(np.linalg.norm(dat-est)**2)/(ndat-1)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
 ##            saving[sta][3]['est'].append(est)
 ##            saving[sta][3]['dat'].append(dat)
             try:
@@ -714,8 +723,8 @@ for ior in range(len(oridlst)):
             saving[sta][3]['misfit'].append(np.sqrt(var*(ndat-1))/ndat)
             saving[sta][3]['err'].append(np.sqrt(var*GS3inv.diagonal()[ista])) ## cov(m)=cov(d)inv(G'G) FOR OVERDETERMINED PROBLEM
             saving[sta][3]['aveATTEN'].append((1000*tstarS[ista]/saving[sta]['Stt']))
-            saving[sta][3]['resspec'].append(tstarsub.calresspec(saving[sta],sta,orid,'S',lnmomenS,
-                                                     bestfcp,bestalpha))
+            saving[sta][3]['Sresspec']=tstarsub.calresspec(saving[sta],sta,orid,'S',lnmomenS,
+                                                     bestfcp,bestalpha)
             if saving[sta][3]['aveATTEN'][0]==0:
                 saving[sta][3]['QpQs']=1.75
             else:
@@ -727,7 +736,7 @@ for ior in range(len(oridlst)):
         for icntp in range(len(staS3lst)):
             sta=staS3lst[icntp]
             sitefl=resultdir+'/%s_%d_Sresspec_%s.dat' % (subdb,orid,sta)
-            np.savetxt(sitefl,saving[sta][3]['resspec'][1], fmt='%10.4f  %15.8e  %6.2f')
+            np.savetxt(sitefl,saving[sta][3]['Sresspec'], fmt='%10.4f  %15.8e  %6.2f')
 
         ## OUTPUT RESULTS FOR TOMOGRAPHY
         ftstar=open(resultdir+'/%s_%d_sstar%03d.dat' % (subdb,orid,int(alpha[0]*100)),'w')
@@ -752,10 +761,10 @@ for ior in range(len(oridlst)):
             for sta in staS3lst:
                 if saving[sta][2]['good'][1]:
                     print('Plotting S spectrum of ' + sta)
-#                     if sta in allsite.keys():
-#                         sitedata=allsite[sta][:,1]
-#                     else:
-                    sitedata=0
+                    if sta in allSsite.keys():
+                        sitedata=allSsite[sta][:,1]
+                    else:
+                        sitedata=0
                     tstarsub.plotspec(saving[sta],sta,orid,'S',lnmomenS,
                                       bestfcs,bestalpha,3,sitedata)
 ## AVERAGE RESIDUAL AND MISFIT FOR P AND S

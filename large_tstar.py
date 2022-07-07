@@ -11,6 +11,10 @@ import numpy as np
 from scipy.optimize import *
 from scipy.linalg import lstsq
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.rcParams['pdf.fonttype'] = 42
+mpl.rcParams['font.size']=24
+mpl.rcParams['axes.formatter.limits']=[-2,2]
 import globaldb as g
 import tstarsub
 
@@ -28,14 +32,14 @@ misfitS=0.85
 ##fc=np.hstack((np.arange(loco,1.01,0.05),np.arange(1.1,(hico+0.51),0.1)))
 dstress=[0.5,20.0]   ## STRESS DROP IN MPa
 ##TIME DOMAIN PARAMETERS
-WLP=5.0
+WLP=3.0
 WLS=8.0
 pretime=50
 posttime=150
 prewin=[0.5,1]  ## WINDOW START BEFORE ARRIVAL
 dt=0.025
 beta=4000       ## SHEAR VELOCITY IN m/s FOR APPROXIMATING CORNER FREQUENCY
-doplotseis=False
+doplotseis=True
 doplotsnr=False
 doplotspec=True
 doplotfcts=False
@@ -49,11 +53,14 @@ doplotfcts=False
 ##keyevt=int(keyevt)
 ##print('input:',alpha,fcps,subdb,keyevt)
 
-subdb='4'
-workdir='/P/weisq/attentomo/tstarlarge/tstarlarge_fcp0.5-20MPa0.27'
+subdb='3'
+#workdir='/P/weisq/attentomo/tstarlarge/tstarlarge_fcp0.5-20MPa0.27'
+workdir='/P/weisq/attentomo/tstarlarge/newtstarlarge'
 alpha=[0.27]
 fcps=1.0        ## fc(P)/fc(S)
-keyevt=54521
+keyevt=52271
+#plotstnlst=['C05W','C02']
+plotstnlst=[]
 
 evlst='/P/weisq/attentomo/input/eventid_sub%s.lst' % subdb
 oridlst=[int(line.split()[0]) for line in open(evlst).readlines()[1:]]
@@ -233,6 +240,11 @@ for ior in range(len(oridlst)):
         ## SWINDATA2 = S SIGNAL, NOISE DATA & P CODA ON CHANNEL 2
         ## IF S ARRIVEL DOES NOT EXIST, s_dd=p_dd AND sn_dd=pn_dd
         ##    print("Windowing seismic data")
+        if sta in plotstnlst:
+#        if len(sta)>0:
+            doplotseis=True
+        else:
+            doplotseis=False
         (p_dd,pn_dd,s_dd1,sn_dd1,pc_dd1,s_dd2,sn_dd2,pc_dd2,SDATA)=tstarsub.fixwin(dd,
                 tt,dt,chan,ARRIV[ii+1],prewin,WLP,WLS,SDATA,doplotseis,orid,sta)
         PWINDATA  = np.vstack((p_dd,pn_dd))
@@ -416,19 +428,19 @@ for ior in range(len(oridlst)):
     fig=plt.figure(10)
     fig.clf()
     fig.subplots_adjust(wspace=0.3,hspace=0.3)
-    ax1=fig.add_subplot(1,2,1)
+    ax1=fig.add_subplot(2,1,1)
     ax1.plot(resultP[:,0],L2Pall,'b*-')
     ax1.plot(bestfcp,min(L2Pall),'r^',ms=10)
     ax1.set_xlabel('Corner Frequency (Hz)')
     ax1.set_ylabel('L2 Norm')
     ax1.set_title('ORID = %s_%d' % (subdb,orid))
-    ax2=fig.add_subplot(1,2,2)
+    ax2=fig.add_subplot(2,1,2)
     ax2.plot(resultP[:,0],np.log10(np.exp(resultP[:,1])*1e7),'b*-')
     ax2.plot(bestfcp,np.log10(np.exp(bestresult[1])*1e7),'r^',ms=10)
     ax2.set_xlabel('Corner Frequency (Hz)')
     ax2.set_ylabel('log10(moment)')
     ax2.set_title('ORID = %s_%d' % (subdb,orid))
-    fig.savefig(g.figdir+'/%s_%d_fcP.eps' % (subdb,orid))
+    fig.savefig(g.figdir+'/%s_%d_fcP.pdf' % (subdb,orid))
     ##plt.show()
 
     ## PLOT t*(P) VS CORNER FREQUENCY FOR EACH STATION
@@ -563,8 +575,10 @@ for ior in range(len(oridlst)):
     ftstar.close()
 
     ## PLOT P SPECTRUM FOR EACH STATION
-    if doplotspec:
-        for sta in staP3lst:
+#    if doplotspec:
+    for sta in staP3lst:
+        if sta in plotstnlst:
+#        if len(sta)>0:
             if saving[sta][2]['good'][0]:
                 print('Plotting P spectrum of ' + sta)
                 tstarsub.plotspec(saving[sta],sta,orid,'P',lnmomenP,
@@ -711,8 +725,10 @@ for ior in range(len(oridlst)):
 
 
         ## PLOT S SPECTRUM FOR EACH STATION
-        if doplotspec:
-            for sta in staS3lst:
+#        if doplotspec:
+        for sta in staS3lst:
+#            if sta in plotstnlst:
+            if len(sta)>0:
                 if saving[sta][2]['good'][1]:
                     print('Plotting S spectrum of ' + sta)
                     tstarsub.plotspec(saving[sta],sta,orid,'S',lnmomenS,

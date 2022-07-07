@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Canopy.framework/bin/python
+#!/opt/antelope/5.4/bin/python
 import os
 import numpy as np
 
@@ -7,9 +7,6 @@ nodefl=s.split()[0]
 pors=s.split()[1].upper()
 minhits=int(s.split()[2])
 ntop=int(s.split()[3])
-minQ=0.005
-if pors=='R' and os.path.isfile('Qinv.p'):
-    minQ=float(s.split()[4])
 
 ## INPUT Q GRID
 [nnx,nny,nnz]=[int(ii) for ii in open(nodefl).readlines()[0].split()]
@@ -39,7 +36,7 @@ for i in range(nnx):
     for j in range(nny):
         for k in range(nnz):
             hits[i,j,k]=hit[i*nny+j+1-1,k]
-# 
+
 ## INPUT Q MODEL
 if pors=='R' and os.path.isfile('Qinv.p'):
     qinv=np.loadtxt('Qinv.p')
@@ -48,7 +45,7 @@ if pors=='R' and os.path.isfile('Qinv.p'):
     for i in range(nnx):
         for j in range(nny):
             for k in range(nnz):
-                if abs(qinv[nn]+111)<0.01 or qinv[nn]<minQ:
+                if abs(qinv[nn]+111)<0.01 or qinv[nn]<0.01:
                     hits[i,j,k]=0
                 nn=nn+1
 

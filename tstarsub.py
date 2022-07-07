@@ -1041,6 +1041,7 @@ def plotspec(saving,sta,orid,POS,lnmomen,fc,alpha,icase,sitedata=0):
     frmin=saving[2]['frmin'][ind]
     frmax=saving[2]['frmax'][ind]
     invtstar=saving[icase]['tstar'][ind]
+    invterr=saving[icase]['err'][ind]
     synspec=(corr*np.exp(lnmomen)*np.exp(-np.pi*freq*(freq**(-alpha))*invtstar)/(1+(freq/fc)**2))
     if POS.upper()=='S':
         invtstarP=saving[icase]['tstar'][0]
@@ -1048,10 +1049,12 @@ def plotspec(saving,sta,orid,POS,lnmomen,fc,alpha,icase,sitedata=0):
         ttS=saving['Stt']
         QpQs=2.25
         invtstar2=invtstarP*QpQs*ttS/ttP
-        synspec2=(corr*np.exp(lnmomen)*np.exp(-np.pi*freq*(freq**(-alpha))*invtstar2)/(1+(freq/fc)**2))
+        synspec2=(corr*np.exp(lnmomen)*np.exp(-np.pi*freq*(freq**(-alpha))
+                  *invtstar2)/(1+(freq/fc)**2))
         QpQs=1.75
         invtstar2=invtstarP*QpQs*ttS/ttP
-        synspec3=(corr*np.exp(lnmomen)*np.exp(-np.pi*freq*(freq**(-alpha))*invtstar2)/(1+(freq/fc)**2))
+        synspec3=(corr*np.exp(lnmomen)*np.exp(-np.pi*freq*(freq**(-alpha))
+                  *invtstar2)/(1+(freq/fc)**2))
     indx=np.all([(freq>=frmin),(freq<frmax)],axis=0)
     specx=spec[indx]
     freqx=freq[indx]
@@ -1087,6 +1090,14 @@ def plotspec(saving,sta,orid,POS,lnmomen,fc,alpha,icase,sitedata=0):
     plt.plot([frmin,frmin],np.log([min(n_spec),max(spec)]),'g')
     plt.plot([frmax,frmax],np.log([min(n_spec),max(spec)]),'g')
     plt.plot(freq,np.log(synspec),'g--',linewidth=2)
+####   Plot t* error
+#     synspec1=(corr*np.exp(lnmomen)*np.exp(-np.pi*freq*(freq**(-alpha))
+#             *(invtstar+invterr))/(1+(freq/fc)**2))
+#     synspec2=(corr*np.exp(lnmomen)*np.exp(-np.pi*freq*(freq**(-alpha))
+#             *(invtstar-invterr))/(1+(freq/fc)**2))
+#     plt.plot(freq,np.log(synspec1),'g--',linewidth=1)
+#     plt.plot(freq,np.log(synspec2),'g--',linewidth=1)
+####   Plot t* error
     if POS.upper()=='S':
         plt.plot(freq,np.log(synspec2),'k:',linewidth=2)
         plt.plot(freq,np.log(synspec3),'k--',linewidth=2)
@@ -1097,7 +1108,7 @@ def plotspec(saving,sta,orid,POS,lnmomen,fc,alpha,icase,sitedata=0):
 ##    plt.loglog(freq,synspec,'g--',linewidth=2)
 ##    plt.plot(freqx,est,'k--')
 ##    plt.plot(freqx,dat,'k')
-    plt.text(textx,max(np.log(spec))/2,'t* = %.2f' % invtstar)
+    plt.text(textx,max(np.log(spec))/2,'$t* = %.3f \pm %.3f sec $' % (invtstar,invterr))
 ##    plt.text(10,max(np.log(spec))/4,'curve fitting = %.4f' % resid)
 ##    plt.text(10,max(np.log(spec))/7,'misfit = %.4f' % saving[icase]['misfit'][ind])
 ##    plt.text(10,max(np.log(spec))/2.5,'sd = %.4f' % saving[icase]['err'][ind])

@@ -7,7 +7,7 @@ from antelope.datascope import *
 def dbread(subdb):
     global figdir,dbname,db,dbja,dbass,dbwf,dbresp,dbor,sacdir
     figdir='./specfig_sub'+subdb
-    sacdir='/Volumes/igppwei/sacfl/'
+    sacdir='/mnt/home/swei/LauQtomo/sacfl/'
 ##    if subdb=='5':
 ##        dbname='/P/sopac/mydatabases/lau-alldb/lau-alldb'
 ##    elif subdb=='2':
@@ -22,7 +22,7 @@ def dbread(subdb):
 ##        dbname='/P/aadams/mydatabases/intermediate/sub01/lau-all-GSN-1'
 ##    elif subdb=='22':
 ##        dbname='/P/aadams/mydatabases/intermediate/sub02/lau-all-GSN-2'
-    dbdir='/Volumes/igppwei/LAU2010/picked-subsets/'
+    dbdir='/mnt/research/seismo_wei/DB/LAU2010/picked-subsets/'
     if subdb=='1':
         dbname=dbdir+'lau-all-GSNdb-subset-01'
     elif subdb=='11':

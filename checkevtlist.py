@@ -1,4 +1,4 @@
-#!/opt/antelope/5.3/bin/python
+#!/opt/antelope/5.8/bin/python
 ## PROGRAM TO CHECK THE ERRORS OF THE EVENT LIST
 ## WRITTEN BY S. WEI, SEP. 2014
 

@@ -1,3 +1,4 @@
+#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 ## PROGRAM TO ADD NOISE TO SYNTHETIC DATA OF t*
 
 import os

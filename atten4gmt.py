@@ -1,3 +1,4 @@
+#!/opt/antelope/5.4/bin/python
 import os,glob
 import numpy as np
 
@@ -5,12 +6,9 @@ s=raw_input('Please input resultfl Qnode P/S nnz1D ntop: ')
 print(s)
 qmodfl=s.split()[0]
 nodefl=s.split()[1]
-pors=s.split()[2]
+pors=s.split()[2].upper()
 nnz1D=int(s.split()[3])
 ntop=int(s.split()[4])
-
-if len(pors)==1:
-    pors=pors.upper()
 
 ## INPUT Q GRID
 [nnx,nny,nnz]=[int(ii) for ii in open(nodefl).readlines()[0].split()]
@@ -40,7 +38,7 @@ for i in range(nnx):
                 qinv[nn]=-111
             elif qinv[nn]<0:
                 qinv[nn]=0.00001
-            if pors=='R' or pors=='QmQk':
+            if pors=='R':
                 tomo[i,j,k]=qinv[nn]
             else:
                 tomo[i,j,k]=qinv[nn]*1000
@@ -55,14 +53,6 @@ elif pors=='S':
     tomoprem=1000/qprem[:,1]
 elif pors=='R':
     tomoprem=qprem[:,0]/qprem[:,1]
-elif pors=='QmQk':
-    tomoprem=qprem[:,0]/qprem[:,1]
-    tomoprem[0]=600./57823.
-    tomoprem[1]=600./57823.
-elif pors=='Qk':
-    tomoprem=qprem[:,0]/qprem[:,1]
-    tomoprem[0]=1000./57823.
-    tomoprem[1]=1000./57823.
 
 ## OUTPUT 1000/Q AT DEPTHS OF 0 AND/OR 12 KM
 outfl=open('atten'+pors+'.dep000','w')
@@ -74,19 +64,7 @@ if ntop==0:
     outfl=open('atten'+pors+'.dep012','w')
     for i in range(nnx):
         for j in range(nny):
-#            outfl.write('%10.4f %10.4f %10.4f\n' % (lon[i,j],lat[i,j],tomoprem[1]))
-            if (abs(tomo[i,j,k]+111)<0.01) and pors=='R':
-                outfl.write('%10.4f %10.4f NaN\n' %
-                            (lon[i,j],lat[i,j]))
-            elif (abs(tomo[i,j,k]+111)<0.01) and pors=='QmQk':
-                outfl.write('%10.4f %10.4f 0.01\n' %
-                            (lon[i,j],lat[i,j]))
-            elif (abs(tomo[i,j,k]+111000)<0.01) and pors=='Qk':
-                outfl.write('%10.4f %10.4f 0.0173\n' %
-                            (lon[i,j],lat[i,j]))
-            else:
-                outfl.write('%10.4f %10.4f %10.4f\n' %
-                            (lon[i,j],lat[i,j],tomo[i,j,k]))
+            outfl.write('%10.4f %10.4f %10.4f\n' % (lon[i,j],lat[i,j],tomoprem[1]))
     outfl.close()
 
 ## OUTPUT 1000/Q AT EACH DEPTH
@@ -94,14 +72,8 @@ for k in range(nnz):
     outfl=open('atten%s.dep%03.0f' % (pors,dep[k]),'w')
     for i in range(nnx):
         for j in range(nny):
-            if (abs(tomo[i,j,k]+111)<0.01) and pors=='R':
+            if (abs(tomo[i,j,k]+111)<0.01):
                 outfl.write('%10.4f %10.4f NaN\n' %
-                            (lon[i,j],lat[i,j]))
-            elif (abs(tomo[i,j,k]+111)<0.01) and pors=='QmQk':
-                outfl.write('%10.4f %10.4f 0.01\n' %
-                            (lon[i,j],lat[i,j]))
-            elif (abs(tomo[i,j,k]+111000)<0.01) and pors=='Qk':
-                outfl.write('%10.4f %10.4f 0.0173\n' %
                             (lon[i,j],lat[i,j]))
             else:
                 outfl.write('%10.4f %10.4f %10.4f\n' %
@@ -119,46 +91,3 @@ for k in range(nnz1D):
         else:
             outfl.write('%10.4f\n' % (1/qinv1D[k]))
 outfl.close()
-
-## READ AND OUTPUT MODEL RESOLUTION AND VARIANCE IF EXIST
-modresfl=qmodfl+'_varm'
-if os.path.isfile(modresfl) and pors=='R':
-    qinvvar=np.loadtxt(modresfl)
-    tomovar=np.zeros((nnx,nny,nnz))
-    tomores=np.zeros((nnx,nny,nnz))
-    nn=0
-    for i in range(nnx):
-        for j in range(nny):
-            for k in range(nnz):
-                tomores[i,j,k]=qinvvar[nn,0]
-                tomovar[i,j,k]=qinvvar[nn,1]
-                nn=nn+1
-    qinvvar1D=qinvvar[nnx*nny*nnz:]
-    for k in range(nnz):
-        outfl=open('atten%svar.dep%03.0f' % (pors,dep[k]),'w')
-        outfl2=open('atten%sres.dep%03.0f' % (pors,dep[k]),'w')
-        for i in range(nnx):
-            for j in range(nny):
-                outfl.write('%10.4f %10.4f %10.4f\n' %
-                            (lon[i,j],lat[i,j],tomovar[i,j,k]))
-                outfl2.write('%10.4f %10.4f %10.4f\n' %
-                            (lon[i,j],lat[i,j],tomores[i,j,k]))
-        outfl.close()
-elif os.path.isfile(modresfl) and (pors=='P' or pors=='S' or pors=='Qk'):
-    qinvvar=np.loadtxt(modresfl)
-    tomovar=np.zeros((nnx,nny,nnz))
-    nn=0
-    for i in range(nnx):
-        for j in range(nny):
-            for k in range(nnz):
-                tomovar[i,j,k]=qinvvar[nn]*1000
-                nn=nn+1
-    qinvvar1D=qinvvar[nnx*nny*nnz:]
-    for k in range(nnz):
-        outfl=open('atten%sstd.dep%03.0f' % (pors,dep[k]),'w')
-        for i in range(nnx):
-            for j in range(nny):
-                outfl.write('%10.4f %10.4f %10.4f\n' %
-                            (lon[i,j],lat[i,j],tomovar[i,j,k]))
-
-        outfl.close()
