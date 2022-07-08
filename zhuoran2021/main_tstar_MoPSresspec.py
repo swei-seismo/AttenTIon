@@ -330,9 +330,9 @@ for ior in range(len(oridlst)):
     logfl.write('ave stiim: %f\n'%(sti/stinum))
     logfl.write("%d records for best fc(P) and alpha, %d records for t*(P), %d records for t*(S)\n"
                 %(len(staP1lst),len(staP2lst),len(staS2lst)))
-    print(staP1lst)
-    print(staP2lst)
-    print(staP3lst)
+    #print(staP1lst)
+    #print(staP2lst)
+    #print(staP3lst)
 #    exit()
 
     if len(staP1lst) < 5:
@@ -406,8 +406,7 @@ for ior in range(len(oridlst)):
     
     ## BUILD G MATRIX TO FIND BEST fc AND alpha
     GP1 = tstarsub.buildG(saving,staP1lst,alpha,'P',1,mw_flag)
-    print(GP1)
-    exit()
+    #print(GP1)
     tsfc = np.zeros((len(fc),len(staP1lst)))
     for ialco in range(len(alpha)):
         GPinv = np.linalg.inv(np.dot(GP1[:,:,ialco].transpose(),GP1[:,:,ialco]))
@@ -541,6 +540,8 @@ for ior in range(len(oridlst)):
     lnmomenPerr = np.sqrt(vardatP2*GP2inv[0][0])
     ## ESTIMATE t* ERRORS BASED ON DATA VARIANCES FOR EACH t*
     estdataP = np.dot(GP2[:,:,ialco],modelP)
+    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE norm^2/(size_all-num_std_so_far-1)
+    var = (residuP**2)/(dataP2.size-len(staP2lst)-2)
     staP3lst = []
     k1 = 0
     avepfitting = 0
@@ -549,9 +550,9 @@ for ior in range(len(oridlst)):
         sta = staP2lst[ista]
         ndat = len(saving[sta][2]['p'][0])
         k2 = k1+ndat
-        dat = dataP2[k1:k2]
-        est = estdataP[k1:k2]
-        var = (np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+#        dat = dataP2[k1:k2]
+#        est = estdataP[k1:k2]
+#        var = (np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
         saving[sta][2]['tstar'] = [tstarP[ista]]
         saving[sta][2]['misfit'] = [np.sqrt(var*(ndat-2))/ndat]
         if mw_flag == True:
@@ -608,14 +609,16 @@ for ior in range(len(oridlst)):
     lnmomenPerr = np.sqrt(vardatP3*GP3inv[0][0])
     ##  ESTIMATE t* ERRORS BASED ON DATA VARIANCES FOR EACH t*
     estdataP = np.dot(GP3[:,:,ialco],modelP)
+    ## PSOTERIOR VARIANCE USED AS PRIOR VARIANCE norm^2/(size_all-num_stad_so_far-1)
+    var = (residuP**2)/(dataP3.size-len(staP3lst)-2)
     k1 = 0
     for ista in range(len(staP3lst)):
         sta = staP3lst[ista]
         ndat = len(saving[sta][2]['p'][0])
         k2 = k1+ndat
-        dat = dataP3[k1:k2]
-        est = estdataP[k1:k2]
-        var = (np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+#        dat = dataP3[k1:k2]
+#        est = estdataP[k1:k2]
+#        var = (np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
         saving[sta][3] = {}
         saving[sta][3]['tstar'] = [tstarP[ista]]
         saving[sta][3]['misfit'] = [np.sqrt(var*(ndat-2))/ndat]
@@ -632,7 +635,7 @@ for ior in range(len(oridlst)):
     ## MOMENT MAGNITUDE Mw
     momenP = np.exp(lnmomenP)
     Mw = float(2.0/3.0*(np.log10(momenP*1e7))-10.73)
-    print(lnmomenP,momenP,Mw)
+    #print(lnmomenP,momenP,Mw)
     #logfl.write('Mw_inv = %.2f, Mw_calc = %.2f\n' % (Mw,mw_calc))
     logfl.write("Mw_inv = %.2f\n" %(Mw)) 
 
@@ -702,6 +705,8 @@ for ior in range(len(oridlst)):
         ferr.close()
         ## ESTIMATE t* ERRORS BASED ON DATA VARIANCES FOR EACH t*
         estdataS = np.dot(GS2[:,:,ialco],modelS)
+        ## PSOTERIOR VARIANCE USED AS PRIOR VARIANCE norm^2/(size_all-num_stad_so_far-1)
+        var = (residuS**2)/(dataS2.size-len(staS2lst)-2)
         staS3lst = []
         k1 = 0
         avesfitting = 0
@@ -710,9 +715,9 @@ for ior in range(len(oridlst)):
             sta = staS2lst[ista]
             ndat = len(saving[sta][2]['s'][0])
             k2 = k1+ndat
-            dat = dataS2[k1:k2]
-            est = estdataS[k1:k2]
-            var = (np.linalg.norm(dat-est)**2)/(ndat-1)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+#            dat = dataS2[k1:k2]
+#            est = estdataS[k1:k2]
+#            var = (np.linalg.norm(dat-est)**2)/(ndat-1)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
             saving[sta][2]['tstar'].append(tstarS[ista])
             saving[sta][2]['misfit'].append(np.sqrt(var*(ndat-1))/ndat)
             saving[sta][2]['err'].append(np.sqrt(var*GS2inv.diagonal()[ista])) ## cov(m)=cov(d)inv(G'G) FOR OVERDETERMINED PROBLEM
@@ -756,14 +761,16 @@ for ior in range(len(oridlst)):
         tstarS = modelS       ## t*
         ## ESTIMATE t* ERRORS BASED ON DATA VARIANCES FOR EACH t*
         estdataS = np.dot(GS3[:,:,ialco],modelS)
+        ## PSOTERIOR VARIANCE USED AS PRIOR VARIANCE norm^2/(size_all-num_stad_so_far-1)
+        var = (residuS**2)/(dataS3.size-len(staS3lst)-2)
         k1 = 0
         for ista in range(len(staS3lst)):
             sta = staS3lst[ista]
             ndat = len(saving[sta][2]['s'][0])
             k2 = k1+ndat
-            dat = dataS3[k1:k2]
-            est = estdataS[k1:k2]
-            var = (np.linalg.norm(dat-est)**2)/(ndat-1)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+#            dat = dataS3[k1:k2]
+#            est = estdataS[k1:k2]
+#            var = (np.linalg.norm(dat-est)**2)/(ndat-1)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
             try:
                 saving[sta][3]
             except KeyError:
