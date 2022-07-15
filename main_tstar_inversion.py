@@ -5,7 +5,6 @@
 ## Edited by Yurong Zhang, Jun. 2022
 
 import os
-
 from importlib_metadata import files
 import tstar_parameters as tp
 import tstar_load
@@ -14,8 +13,7 @@ from mpi4py import MPI
 import numpy as np
 
 comm = MPI.COMM_WORLD
-size = comm.Get_size()
-rank = comm.Get_rank()
+size, rank = comm.Get_size(), comm.Get_rank()
 
 param = tp.set_parameters()
 oridlst = tp.working_dir()
