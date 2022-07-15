@@ -53,7 +53,8 @@ def loadORIG(orid, source_para,ORIG,cmd):
 
     ######need to modify the input files and formats for your dataset######
     if source_para == 1:
-        evlst = os.path.abspath(os.path.dirname(os.path.dirname(os.getcwd())))+"/eventid_sub4.lst"
+        sub = orid.split('_')[0]
+        evlst = os.path.abspath(os.path.dirname(os.path.dirname(os.getcwd())))+"/eventid_sub%s.lst"%sub
         for line in open(evlst).readlines()[1:]:
             if orid.split('_')[1] == line.split()[0]:
                 ORIG['mb'] = float(line.split()[6])
@@ -133,7 +134,8 @@ def loaddata(param, orid, fldir):
 
         ######need to modify the input file and data formats for your dataset######
         if param['input_arriv'] == 1:
-            arrivlst = os.path.abspath(os.path.dirname(os.path.dirname(os.getcwd())))+"/PSass_4.lst"
+            sub = orid.split('_')[0]
+            arrivlst = os.path.abspath(os.path.dirname(os.path.dirname(os.getcwd())))+"/PSass_%s.lst"%sub
             for line in open(arrivlst).readlines()[1:]:
                 if orid.split('_')[1] == line.split()[0] and sta == line.split()[5]:
                     (ortime, ptime, stime) = \

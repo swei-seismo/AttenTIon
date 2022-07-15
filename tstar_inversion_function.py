@@ -171,7 +171,8 @@ def inversion(orid, saving, stalst, ORIG, POS, icase, param):
     # lnmomenPerr=np.sqrt(vardatP2*GP2inv[0][0])
     ## ESTIMATE t* ERRORS BASED ON DATA VARIANCES FOR EACH t*
     estdata=np.dot(G[:,:,0],model)
-
+    var = (residu**2)/(data.size-len(stalst)-2)
+    
     k1=0
     for ista in range(len(stalst)):
         sta = stalst[ista]
@@ -179,7 +180,8 @@ def inversion(orid, saving, stalst, ORIG, POS, icase, param):
         k2=k1+ndat
         dat=data[k1:k2]
         est=estdata[k1:k2]
-        var=(np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+        # var=(np.linalg.norm(dat-est)**2)/(ndat-2)    ## POSTERIOR VARIANCE USED AS PRIOR VARIANCE
+        
         saving[sta][icase]['tstar']=[tstar[ista]]
         saving[sta][icase]['misfit']=[np.sqrt(var*(ndat-2))/ndat]    
         if param['source_para'] == 1: ## grid search for Mw, one more list for G matrix

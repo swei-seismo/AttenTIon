@@ -81,14 +81,22 @@ def working_dir():
     """
     global workdir, sacdir, gsdir, figdir, resultdir, figdir1, figdir2, figdir3, figdir4, figdir5, logfl, fclist
     maindir = os.path.abspath(os.getcwd())
-    workdir = maindir + '/workdir'    ## OUTPUT DIRECTOR
+    # workdir = maindir + '/workdir'    ## OUTPUT DIRECTOR
+    
+    # need to modify! (please use: workdir = maindir + '/workdir')
+    workdir = '/mnt/gs21/scratch/yurong/tstar/workdir' # OUTPUT to scratch dorectory on hpcc when running with a large dataset
+    # need to modify! (please use: workdir = maindir + '/workdir')
     if not os.path.isdir(workdir):
         os.mkdir(workdir)   
 
     namedir = maindir + '/data/Eventname'
-    sacdir = maindir + '/data/processedSeismograms'
-    gsdir = maindir + '/data/GS'
+    # sacdir = maindir + '/data/processedSeismograms'
+    # need to modify! (please use: sacdir = maindir + '/data/processedSeismograms')
+    sacdir = '/mnt/home/yurong/Research/tstar/4YZhang/sacfl'
+    # need to modify! (please use: sacdir = maindir + '/data/processedSeismograms')
 
+    gsdir = maindir + '/data/GS'
+    
     resultdir = workdir + '/result' 
     figdir  = workdir + '/specfig'
     figdir1 = figdir + '/plotseis'
