@@ -13,6 +13,14 @@ def set_parameters():
     :param dstress:
         Stress drop in [MPa], for calculating the reasonable range of theoretical corner frequencies.
 
+    :param minf and maxf:
+        Find the longest segment that meet the SNR thresold.
+    
+    :param mtspec_para:
+        The option for determining which function will be used in multitaper
+        1: mtspec
+        2: sine_psd
+    
     :param doplotseis: bool
         Determine whether to plot all the three-component seismograms in ./workdir/specfig/plotseis.
     :param doplotsnr: bool
@@ -55,7 +63,7 @@ def set_parameters():
         "misfitS": 0.85,            ## Minimum misfit for S wave measured by correlative function
         "misfitS2": 0.2,            ## Maximum L2 Norm for S wave
 
-        "dstress": [0.5,20.0],
+        "dstress": [0.5, 20.0],
 
         ## TIME DOMAIN PARAMETERS
         "WLP": 5.0,         ## Window length of P wave signal and corresponding noise
@@ -65,17 +73,24 @@ def set_parameters():
         "gaps": 0.5,        ## Seconds between S noise and signal
         "beta": 4000,       ## Shear velocity in m/s for approximating corner frequency
 
+        ## FREQUENCY DOMAIN PARAMETERS
+        "minf": 0.05,
+        "maxf": 15.0,
+
+        ## OPTIONS FOR MULTITAPER METHOD
+        "mtspec_para":1, 
+
         ## OPTIONS FOR PLOTTING FIGURES
-        "doplotseis": False,
-        "doplotsnr": False,
-        "doplotspec": False,
+        "doplotseis": True,
+        "doplotsnr": True,
+        "doplotspec": True,
         "plotspecloglog": False,
         "doplotfcts": True,
         "doplotfcall": True,
 
         ## OPTIONS FOR DETERMINING SOURCE PARAMTERS
         "source_para": 1,
-        "input_arriv": 1, 
+        "input_arriv": 0, 
         "alpha": 0.27,
         "fcps": 1.0,       ## fc(P)/fc(S)
 
@@ -86,7 +101,8 @@ def working_dir():
     """ 
     Define all the working dictionaries with absolute paths and return the event list
     """
-    global workdir, sacdir, gsdir, figdir, resultdir, figdir1, figdir2, figdir3, figdir4, figdir5, logfl, fclist
+    global workdir, sacdir, gsdir, figdir, resultdir, figdir1, \
+           figdir2, figdir3, figdir4, figdir5, logfl, fclist
     
     maindir = os.getcwd()
     sacdir = maindir + '/data/processedSeismograms'
@@ -108,7 +124,7 @@ def working_dir():
     dir_lst = [figdir, resultdir, figdir1, figdir2, figdir3, figdir4, figdir5]
     for idir in dir_lst:
         if not os.path.exists(idir):
-            os.mkdirs(idir)
+            os.makedirs(idir)
 
     logfile = workdir + '/event.log' 
     logfl = open(logfile,'w')
