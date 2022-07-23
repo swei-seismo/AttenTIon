@@ -5,12 +5,11 @@
 ## Edited by Yurong Zhang, Jun. 2022
 
 import os
-from importlib_metadata import files
-import tstar_parameters as tp
 import tstar_load
-import tstar_inversion_function as tf
-from mpi4py import MPI
 import numpy as np
+from mpi4py import MPI
+import tstar_parameters as tp
+import tstar_inversion_function as tf
 
 comm = MPI.COMM_WORLD
 size, rank = comm.Get_size(), comm.Get_rank()
