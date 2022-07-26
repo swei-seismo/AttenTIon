@@ -13,7 +13,8 @@ from mpi4py import MPI
 import numpy as np
 
 comm = MPI.COMM_WORLD
-size, rank = comm.Get_size(), comm.Get_rank()
+size = comm.Get_size()
+rank = comm.Get_rank()
 
 param = tp.set_parameters()
 oridlst = tp.working_dir()
@@ -21,11 +22,16 @@ oridlst = tp.working_dir()
 ## problem: data preprocessing? deal with sac files with picked arrival times
 
 num = int(len(oridlst)/size)
+# loop = np.arange(rank*num, (rank+1)*num, 1)
 bgn = rank*num
 num_last = len(oridlst) - (size-1)*num
-NUM = (rank<size-1 and num or num_last)
+num_for_processor = (rank<size-1 and num or num_last)
 
-for ior in np.arange(bgn,bgn+NUM,1):
+##Load site effects
+allPsite = tstar_load.loadsite(param['add_site'])
+
+for ior in np.arange(bgn,bgn+num_for_processor,1):
+# for ior in loop:
 
     orid=oridlst[ior]
     tp.logfl.write('\nWorking on ORID # %s\n' % orid)
@@ -53,13 +59,13 @@ for ior in np.arange(bgn,bgn+NUM,1):
         if len(staP1lst)<5:
             print('Not enough good P wave record for event %s.' % orid)
             continue
-        ##grid search for the best fc
-        (ORIG, flag) = tf.bestfc(orid, saving, staP1lst, ORIG, 'P', 1, param)
+        ##1st inversion: grid search for the best fc
+        (ORIG, flag) = tf.bestfc(orid, saving, staP1lst, ORIG, 'P', 1, param, allPsite)
         if flag == 0:
             continue
 
     ##2nd inversion: INVERT t*(P) WITH BEST fc
-    (ORIG, saving) = tf.inversion(orid, saving, staP2lst, ORIG, 'P', 2, param)
+    (ORIG, saving) = tf.inversion(orid, saving, staP2lst, ORIG, 'P', 2, param, allPsite)
     for sta in staP2lst:
         if saving[sta][2]['fitting'][0]>param['misfitP']:
             staP3lst.append(sta)
@@ -67,10 +73,10 @@ for ior in np.arange(bgn,bgn+NUM,1):
         print('Not enough good P wave record for event %s.' % orid)
         continue  
     ##3rd inversion: NVERTING AGAIN WITHOUT fitting < 0.85
-    (ORIG, saving) = tf.inversion(orid, saving, staP3lst, ORIG, 'P', 3, param)
+    (ORIG, saving) = tf.inversion(orid, saving, staP3lst, ORIG, 'P', 3, param, allPsite)
 
     ##output the results
-    tf.output_results(orid, staP3lst, param, ORIG, saving)
+    tf.output_results(orid, staP3lst, param, ORIG, saving, allPsite, param['add_site'])
 
 
 tp.logfl.close()

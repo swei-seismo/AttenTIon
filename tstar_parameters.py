@@ -27,6 +27,11 @@ def set_parameters():
         The option to read P and S arrival times-
             0: read arrival time from sac files
             1: read arrival time from input file './data/arriv.dat'
+    :param add_site:
+        The option for inversion with or without site effects-
+            0: without site effects, when inverting for the 1st time
+            1: with site effects, when inverting for the 2nd time
+
    """
     param = {
         ## FREQUENCY DOMAIN PARAMETERS AND ALPHA
@@ -60,10 +65,10 @@ def set_parameters():
         "beta": 4000,       ## SHEAR VELOCITY IN m/s FOR APPROXIMATING CORNER FREQUENCY
 
         ##OPTIONS FOR PLOTTING FIGURES
-        "doplotseis": False,
-        "doplotsnr": False,
-        "doplotspec": False,
-        "plotspecloglog": True,
+        "doplotseis": True,
+        "doplotsnr": True,
+        "doplotspec": True,
+        # "plotspecloglog": True,
         "doplotfcts": True,
         "doplotfcall": True,
 
@@ -73,13 +78,16 @@ def set_parameters():
         "alpha": 0.27,
         "fcps": 1.0,       ## fc(P)/fc(S)
 
+        ##OPTION FOR INVERSION
+        "add_site": 1
+
     }
     return param
 
 def working_dir():
     """ All the working directories with absolute paths
     """
-    global workdir, sacdir, gsdir, figdir, resultdir, figdir1, figdir2, figdir3, figdir4, figdir5, logfl, fclist
+    global workdir, sacdir, sitedir, gsdir, figdir, resultdir, figdir1, figdir2, figdir3, figdir4, figdir5, logfl, fclist
     maindir = os.path.abspath(os.getcwd())
     # workdir = maindir + '/workdir'    ## OUTPUT DIRECTOR
     
@@ -87,13 +95,15 @@ def working_dir():
     workdir = '/mnt/gs21/scratch/yurong/tstar/workdir' # OUTPUT to scratch dorectory on hpcc when running with a large dataset
     # need to modify! (please use: workdir = maindir + '/workdir')
     if not os.path.isdir(workdir):
-        os.mkdir(workdir)   
+        os.makedirs(workdir,exist_ok=True)   
 
     namedir = maindir + '/data/Eventname'
-    # sacdir = maindir + '/data/processedSeismograms'
-    # need to modify! (please use: sacdir = maindir + '/data/processedSeismograms')
-    sacdir = '/mnt/home/yurong/Research/tstar/4YZhang/sacfl'
-    # need to modify! (please use: sacdir = maindir + '/data/processedSeismograms')
+    sacdir = maindir + '/data/processedSeismograms'
+    sitedir = maindir + '/data/sitespec'
+    # sitedir = '/mnt/home/yurong/Research/tstar/4YZhang/sitespec'
+    # # need to modify! (please use: sacdir = maindir + '/data/processedSeismograms')
+    # sacdir = '/mnt/home/yurong/Research/tstar/4YZhang/sacfl'
+    # # need to modify! (please use: sacdir = maindir + '/data/processedSeismograms')
 
     gsdir = maindir + '/data/GS'
     
@@ -113,7 +123,7 @@ def working_dir():
     dir_lst = [figdir, resultdir, figdir1, figdir2, figdir3, figdir4, figdir5]
     for idir in dir_lst:
         if not os.path.isdir(idir):
-            os.mkdir(idir)
+            os.makedirs(idir,exist_ok=True)
     
     oridlst=[]
     for name in open(namedir).readlines():

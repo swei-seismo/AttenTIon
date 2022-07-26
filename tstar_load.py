@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-import os
+import os, glob
 import subprocess as sp
 import numpy as np
 import tstar_parameters as tp
@@ -53,10 +53,9 @@ def loadORIG(orid, source_para,ORIG,cmd):
 
     ######need to modify the input files and formats for your dataset######
     if source_para == 1:
-        sub = orid.split('_')[0]
-        evlst = os.path.abspath(os.path.dirname(os.path.dirname(os.getcwd())))+"/eventid_sub%s.lst"%sub
+        evlst = os.path.abspath(os.path.dirname(os.path.dirname(os.getcwd())))+"/eventid.lst"
         for line in open(evlst).readlines()[1:]:
-            if orid.split('_')[1] == line.split()[0]:
+            if orid == line.split()[0]:
                 ORIG['mb'] = float(line.split()[6])
                 break
         open(evlst).seek(0)
@@ -134,10 +133,9 @@ def loaddata(param, orid, fldir):
 
         ######need to modify the input file and data formats for your dataset######
         if param['input_arriv'] == 1:
-            sub = orid.split('_')[0]
-            arrivlst = os.path.abspath(os.path.dirname(os.path.dirname(os.getcwd())))+"/PSass_%s.lst"%sub
+            arrivlst = os.path.abspath(os.path.dirname(os.path.dirname(os.getcwd())))+"/PSass.lst"
             for line in open(arrivlst).readlines()[1:]:
-                if orid.split('_')[1] == line.split()[0] and sta == line.split()[5]:
+                if orid == line.split()[0] and sta == line.split()[5]:
                     (ortime, ptime, stime) = \
                         (float(line.split()[4]), float(line.split()[9]), float(line.split()[11]))
                     T0 = (ptime == -1 and -1 or ptime-ortime)
@@ -189,3 +187,26 @@ def loadGS(orid, gsdir):
     SGS={'gval':[line.split()[0] for line in open(sgsfile)],'stalist':[line.split()[1] for line in open(sgsfile)]}
 
     return PGS, SGS
+
+def loadsite(load_site):
+    '''
+    When inverting for the t* results for the 2nd time, the site effects should be loaded.
+    Read site effects in "./data/processedSeismograms"
+
+    ...Note:
+        Only P wave site effects are considered for now.
+    '''
+    if load_site == 0:
+        return 0
+    sitedir = tp.sitedir
+    allPsite={}
+    # allSsite={}
+    sitefllst=glob.glob(sitedir+'/Psite_*.spec')
+    for isite in range(len(sitefllst)):
+        sitefl=sitefllst[isite]
+        stn=os.path.basename(sitefl)
+        stn=stn.split('_')[1].split('.')[0]
+        sitedata=np.loadtxt(sitefl)
+        sitedata=np.nan_to_num(sitedata)
+        allPsite[stn]=sitedata 
+    return allPsite

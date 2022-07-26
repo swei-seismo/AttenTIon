@@ -122,7 +122,7 @@ def Loop_Record(orid, stalst, param, ARRIV, PGS, SGS):
     return staP1lst, staP2lst, staP3lst, staS1lst, staS2lst, staS3lst,\
         saving, ARRIV
 
-def inversion(orid, saving, stalst, ORIG, POS, icase, param):
+def inversion(orid, saving, stalst, ORIG, POS, icase, param, allsite):
     """
         #################### INVERSION FOR t* ############################
     ##    EQUATION 3 IN Stachnik, Abers, Christensen, 2004, JGR     ##
@@ -140,7 +140,7 @@ def inversion(orid, saving, stalst, ORIG, POS, icase, param):
     """
     idata = (icase==3 and 2 or icase)
     
-    data = tstarsub.buildd(saving,stalst,ORIG,POS,idata,param['source_para'],ORIG['fc'])
+    data = tstarsub.buildd(saving,stalst,ORIG,POS,idata,param['source_para'],ORIG['fc'],allsite,param['add_site'])
     G = tstarsub.buildG(saving,stalst,param['alpha'],POS,idata,param['source_para'])
     Ginv=np.linalg.inv(np.dot(G[:,:,0].transpose(),G[:,:,0]))
     model,residu=nnls(G[:,:,0],data[:,0])
@@ -204,7 +204,7 @@ def inversion(orid, saving, stalst, ORIG, POS, icase, param):
 
     return ORIG, saving
 
-def bestfc(orid, saving, stalst, ORIG, POS, icase, param):
+def bestfc(orid, saving, stalst, ORIG, POS, icase, param, allsite):
     """ APPROXIMATE CORNER FREQUENCY RANGE BASED ON MAGNITUDE
     EQUATION 4 AND 5 IN Pozgay et al, G3, 2009
     CAREFUL WITH THE UNITS: fc=m/s*((10e6N/m^2)*(N*m))^(1/3)
@@ -235,7 +235,7 @@ def bestfc(orid, saving, stalst, ORIG, POS, icase, param):
     Ginv=np.linalg.inv(np.dot(G[:,:,0].transpose(),G[:,:,0]))
     tsfc=np.zeros((len(fc),len(stalst)))
     for ifc in range(len(fc)):
-        data = tstarsub.buildd(saving,stalst,ORIG,POS,icase,param['source_para'],fc[ifc])
+        data = tstarsub.buildd(saving,stalst,ORIG,POS,icase,param['source_para'],fc[ifc],allsite,param['add_site'])
         model,residu = nnls(G[:,:,0],data[:,0])
         lnmomen = model[0]      ## MOMENT
         tstar = model[1:]       ## t*
@@ -296,7 +296,7 @@ def bestfc(orid, saving, stalst, ORIG, POS, icase, param):
 
     return ORIG, 1
 
-def output_results(orid, staP3lst, param, ORIG, saving):
+def output_results(orid, staP3lst, param, ORIG, saving, allsite, add_site):
     ## OUTPUT P RESIDUAL SPECTRA FOR SITE EFFECTS
     for sta in staP3lst:
         sitefl=tp.resultdir+'/%s_Presspec_%s.dat' % (orid,sta)
@@ -322,9 +322,15 @@ def output_results(orid, staP3lst, param, ORIG, saving):
             if saving[sta][2]['good'][0]:
                 print('Plotting P spectrum of ' + sta)
                 lnM = np.log(ORIG['mo'])
-                print(lnM,ORIG['fc'],ORIG['mo'])
+                # print(lnM,ORIG['fc'],ORIG['mo'])
+                if add_site == 0:
+                    sitedata=0
+                elif sta in allsite.keys():
+                    sitedata=allsite[sta][:,1]
+                else: # 1)add_site = 1 and 2)sta is not in allsite.keys()
+                    sitedata=0
                 tstarsub.plotspec(saving[sta],sta,orid,'P',lnM,
-                                  ORIG['fc'],param['alpha'],3)
+                                  ORIG['fc'],param['alpha'],3,sitedata)
 
     return
 

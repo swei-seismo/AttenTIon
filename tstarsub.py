@@ -353,7 +353,7 @@ def dospec(pwindata, orid, sta, param, chan, data_quality):
 
     return goodP, goodS, spec_px, freq_px, pspec, pn_spec, pfreq, pn_freq, frmin, frmax
 
-def buildd(saving,stalst,ORIG,POS,icase,source_para,fc,lnM=0):
+def buildd(saving,stalst,ORIG,POS,icase,source_para,fc,allsite,add_site,lnM=0):
     """
     Build data matrix
         d = [ln(A1)-ln(C1)+ln(1+(f1i/fc)**2),                   ##
@@ -362,6 +362,7 @@ def buildd(saving,stalst,ORIG,POS,icase,source_para,fc,lnM=0):
     INPUT:   saving - saved spectrum for each station: saving[sta][1]['p']
             stalst - list of used stations
             fc     - corner frequency
+            allsite - site effects of all stations
             POS    - 'P' or 'S'
             icase  - 
                     1: high quality for finding best fc and alpha
@@ -386,8 +387,19 @@ def buildd(saving,stalst,ORIG,POS,icase,source_para,fc,lnM=0):
         freq_x = saving[sta][icase][POS.lower()][0]
         spec_x = saving[sta][icase][POS.lower()][1]
         correc = saving[sta]['corr'][ind]
+        if add_site == 0:
+            sitespec_x = 0
+        elif sta in allsite.keys():
+            sitedata=allsite[sta]
+            sitefreq=sitedata[:,0]
+            sitespec=sitedata[:,1]
+            ind1=np.nonzero(abs(freq_x[0]-sitefreq)<0.01)[0][0]
+            ind2=ind1+len(freq_x)
+            sitespec_x=sitespec[ind1:ind2]
+        else: ## 1)add_site = 1 and 2)sta is not in allsite.leys()
+            sitespec_x = 0
         stad = np.array([np.log(spec_x)-np.log(correc)
-                        +np.log(1+(freq_x/fc)**2)-lnM]).transpose()
+                        +np.log(1+(freq_x/fc)**2)-sitespec_x-lnM]).transpose()
         # print(sta,POS,max(stad),lnM)
         if ista==0:
             data=stad
