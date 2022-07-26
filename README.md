@@ -46,11 +46,18 @@ The calculated files are stored in `./data/GS`
 
 OUTPUT:
 (eventfocal027.log)  ==> corner frequency and magnitude for each event.
+
 (bestfc.lst)         ==> corner frequency for P wave, magnitude and ln(M0) (Seismic moment) for each event.
+
 (result)             ==> spectrum, t* and misfit for each event-station pair.
+
 (plotfall)           ==> corner frequency versus L2 norm and log10(moment) for each event.
+
 (plottstar-fc)       ==> corner frequency versus t* perturbation for each event-station pair.
+
 (plotspec)           ==> spectrum in frequency domain.
+
 (plotseis)           ==> seismogram in time domain.
+
 (plotsnr)            ==> signal-to-noise ratio of spectrum.
 
