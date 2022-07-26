@@ -12,7 +12,8 @@ import tstar_parameters as tp
 import tstar_inversion_function as tf
 
 comm = MPI.COMM_WORLD
-size, rank = comm.Get_size(), comm.Get_rank()
+size = comm.Get_size()
+rank = comm.Get_rank()
 
 param = tp.set_parameters()
 oridlst = tp.working_dir()
@@ -21,11 +22,10 @@ oridlst = tp.working_dir()
 
 num = int(len(oridlst)/size)
 bgn = rank*num
-num_last = len(oridlst) - (size-1)*num
+num_last = len(oridlst)-(size-1)*num
 NUM = (rank<size-1 and num or num_last)
 
-#for ior in np.arange(bgn,bgn+NUM,1):
-for ior in range(len(oridlst)):
+for ior in np.arange(bgn,bgn+NUM,1):
 
     orid = oridlst[ior]
     tp.logfl.write('\nWorking on ORID # %s\n' % orid)

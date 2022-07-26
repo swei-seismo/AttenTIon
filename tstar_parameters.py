@@ -102,7 +102,7 @@ def working_dir():
     Define all the working dictionaries with absolute paths and return the event list
     """
     global workdir, sacdir, gsdir, figdir, resultdir, figdir1, \
-           figdir2, figdir3, figdir4, figdir5, logfl, fclist
+           figdir2, figdir3, figdir4, figdir5, logfl, fclist, catalog
     
     maindir = os.getcwd()
     sacdir = maindir + '/data/processedSeismograms'
@@ -111,7 +111,7 @@ def working_dir():
 
     workdir = maindir+'/workdir'  ## Output dictionary
     if not os.path.exists(workdir):
-        os.makedirs(workdir)
+        os.makedirs(workdir,exist_ok=True)
     
     resultdir = workdir + '/result' 
     figdir  = workdir + '/specfig'
@@ -124,11 +124,11 @@ def working_dir():
     dir_lst = [figdir, resultdir, figdir1, figdir2, figdir3, figdir4, figdir5]
     for idir in dir_lst:
         if not os.path.exists(idir):
-            os.makedirs(idir)
+            os.makedirs(idir,exist_ok=True)
 
     logfile = workdir + '/event.log' 
-    logfl = open(logfile,'w')
-    fclist = open(workdir + '/bestfc.lst','w')
+    logfl = open(logfile,'a')
+    fclist = open(workdir + '/bestfc.lst','a')
     
     oridlst = []
     forid = open(namedir, 'r')

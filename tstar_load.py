@@ -45,8 +45,7 @@ def loadORIG(orid, param):
     """
     ## A loop may be used.
     ORIG = {}
-    catalog_file = "./data/eventid.lst"
-    command = "cat %s | awk '/%s/ {print}'" %(catalog_file, orid)
+    command = "cat %s | awk '/%s/ {print}'" %(tp.catalog, orid)
     event_info = os.popen(command).read().strip()
     # Need to modify the colunm number
     evlo = float(event_info.split()[2])
@@ -192,14 +191,14 @@ def loadGS(orid, gsdir):
     Load files with GS (Geometrical Spreading) and free surface effect,
         etc for zero freq. Amplitude ??
     """
-    pgsfile = '%s/pgsfile%s.txt' % (gsdir,orid)
+    pgsfile = '%s/pgsfile_%s.txt' % (gsdir,orid)
     if not os.path.isfile(pgsfile):
         print('File %s does not exist, using mkgsfl.py to generate' % pgsfile)
         exit()
     PGS = {'gval':[line.split()[0] for line in open(pgsfile)],
            'stalist':[line.split()[1] for line in open(pgsfile)]}
     
-    sgsfile = '%s/sgsfile%s.txt' % (gsdir,orid)
+    sgsfile = '%s/sgsfile_%s.txt' % (gsdir,orid)
     if not os.path.isfile(sgsfile):
         print('File %s does not exist, using mkgsfl.py to generate' % sgsfile)
         exit()
