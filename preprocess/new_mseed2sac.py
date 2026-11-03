@@ -21,7 +21,7 @@ def mseedtosac(miniseed_files, sac_path):
 
 main_path = Path.cwd()
 miniseed_path = Path("/mnt/research/seismo_wei/ZZhang/tstar_inversion/tstar_data/waveforms")
-with open('extra_Eventname', 'r') as f:
+with open('Eventname', 'r') as f:
     oridlst = [line.strip() for line in f if line.strip()]
     comm = MPI.COMM_WORLD
     size = comm.Get_size()

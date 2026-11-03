@@ -5,7 +5,7 @@ import logging
 
 def download_data(orid):
     ## download data based on picks.dat
-    picks_info = "extra_download_data_list.dat"
+    picks_info = "download_data_list.dat"
     with open(picks_info, "r") as f:
         lines = f.readlines()
 
@@ -40,7 +40,7 @@ def download_data(orid):
                 print(f"Download failed for {sta}: {e}")
 
 
-with open("extra_Eventname", "r") as f:
+with open("Eventname", "r") as f:
     oridlst = [line.strip() for line in f]
 
 for orid in oridlst:

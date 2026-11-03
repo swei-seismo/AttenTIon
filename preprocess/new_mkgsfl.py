@@ -85,7 +85,7 @@ def calculate_gs_for_event(orid, catalog_dict, sacdir, workdir):
 print("Calculating constant")
 main_path = Path.cwd()
 workdir = main_path / "GS"
-namedir = main_path / "extra_Eventname"
+namedir = main_path / "Eventname"
 catalog_file = main_path / "AACSE_catalog.dat"
 sacdir = main_path / "correctedSeismograms"
 workdir.mkdir(parents=True, exist_ok=True)

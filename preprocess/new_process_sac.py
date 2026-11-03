@@ -50,6 +50,9 @@ def load_picks(picks_file):
 
 
 def check_single_channel():
+    ## Here we make sure there are 3 channels as input
+    ## For station with only vertical channel, we use the S waveform 
+    ##     on the vertical channel to invert for the S-wave t*
     cmd = "ls *Z.sac | awk -F '.' '{print $1, $2}'"
     output = subprocess.check_output(cmd, shell=True, text=True).strip()
     lines = output.split("\n")
@@ -65,7 +68,8 @@ def check_single_channel():
 
         if len(lst) == 2:
             print(net, sta)
-        
+
+        ## Only vertical channel exists
         for sacfile in lst:
             chan = sacfile.split(".")[2]
             new_chan1 = chan[:-1]+"E"
@@ -191,7 +195,7 @@ seismograms = Path(main_path)/"correctedSeismograms"
 catalog_dict = load_catalog(catalog_file)
 picks_dict = load_picks(picks_file)
 print(f"Loaded {len(catalog_dict)} events and picks for {sum(len(v) for v in picks_dict.values())} stations")
-with open('extra_Eventname', 'r') as f:
+with open('Eventname', 'r') as f:
     oridlst = [line.strip() for line in f if line.strip()]
 
 comm = MPI.COMM_WORLD

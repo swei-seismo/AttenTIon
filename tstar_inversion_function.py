@@ -104,7 +104,7 @@ def fixed_bestfc(orid, ORIG):
 
     cmd = "awk '/%s/ {print $6}' %s" %(orid, tp.spectra)
     output = os.popen(cmd).read().strip()
-    ORIG['fc'] = float(output)*1.2
+    ORIG['fc'] = float(output)
     # ORIG['fc'] = 100
 
     return ORIG

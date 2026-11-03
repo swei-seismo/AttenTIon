@@ -101,7 +101,7 @@ output_base = main_path / "correctedSeismograms"
 PZfile_path = Path("/mnt/research/seismo_wei/ZZhang/tstar_inversion/tstar_data/SACPZ")
 print("Loading PZ file metadata...")
 pz_metadata = load_pz_metadata(PZfile_path)
-with open('extra_Eventname', 'r') as f:
+with open('Eventname', 'r') as f:
     oridlst = [line.strip() for line in f if line.strip()]
 
 comm = MPI.COMM_WORLD
