@@ -78,7 +78,7 @@ def Loop_Record(orid, stalst, param, ARRIV, PGS, SGS, ORIG):
         saving[sta][2]['s'] = [freq_sx, spec_sx]
 
         # Corrections of GS
-        correcP = float(PGS['gval'][PGS['stalist'].index(sta)])
+        correcP = float(PGS['gval'][PGS['stalist'].index(sta)])*1e9
         if correcP == 0:
             print('Bad correction of P wave for station %s' % sta)
             continue
@@ -86,7 +86,7 @@ def Loop_Record(orid, stalst, param, ARRIV, PGS, SGS, ORIG):
         staP2lst.append(sta)
 
         if ARRIV[sta]['SDATA'] and goodS2:
-            correcS = float(SGS['gval'][SGS['stalist'].index(sta)])
+            correcS = float(SGS['gval'][SGS['stalist'].index(sta)])*1e9
             if correcS == 0:
                 print('Bad correction of S wave for station %s' % sta)
                 continue
@@ -104,7 +104,7 @@ def fixed_bestfc(orid, ORIG):
 
     cmd = "awk '/%s/ {print $6}' %s" %(orid, tp.spectra)
     output = os.popen(cmd).read().strip()
-    ORIG['fc'] = float(output)
+    ORIG['fc'] = float(output)*1.2
     # ORIG['fc'] = 100
 
     return ORIG
@@ -146,6 +146,9 @@ def get_good_stalst(orid, saving, stalst, ORIG, POS, icase, param, allsite):
         lnmomen = model[0]
         tstar = model[1:len(stalst)+1]
         error = model[len(stalst)+1:]
+        mean_error = np.mean(error)
+        lnmomen = lnmomen+mean_error
+        error = error-mean_error
     
 
     if POS.upper() == "P":
@@ -154,6 +157,7 @@ def get_good_stalst(orid, saving, stalst, ORIG, POS, icase, param, allsite):
             sta = stalst[ista]
             saving[sta][icase]['tstar'] = [tstar[ista]]
             saving[sta][icase]['error'] = [error[ista]]
+            # print(icase, lnmomen, error[ista])
             fitting = tstarsub.fitting(saving, sta, ORIG, POS, param['alpha'], lnmomen, 2)
             string = orid+" "+sta+" "+POS+" "+str(round(fitting, 4))
             tp.fittingfl.write(string+'\n')
@@ -179,7 +183,7 @@ def get_good_stalst(orid, saving, stalst, ORIG, POS, icase, param, allsite):
         return staS3lst
 
 
-def get_constant_correction(saving, stalst, ORIG, POS, icase, param, allsite):
+def get_constant_correction(orid, saving, stalst, ORIG, POS, icase, param, allsite):
     """
     #################### INVERSION FOR t* ############################
     ##    EQUATION 3 IN Stachnik, Abers, Christensen, 2004, JGR     ##
@@ -209,19 +213,28 @@ def get_constant_correction(saving, stalst, ORIG, POS, icase, param, allsite):
     l_bound[0] = 21
     u_bound = [np.inf]*(2*len(stalst)+1)
     u_bound[0] = 40
+
     result = optimize.lsq_linear(G[:,:,0], data[:,0], bounds=(l_bound, u_bound))
     model = result.x
     
     if param['source_para'] == 1:
+        lnmomen = model[0]
         tstar = model[1:len(stalst)+1]
         error = model[len(stalst)+1:]
+        mean_error = np.mean(error)
+        lnmomen = lnmomen+mean_error
+        error = error-mean_error
     
     for ista in range(len(stalst)):
         sta = stalst[ista]
         if POS.upper() == "P":
             saving[sta][icase]['tstar'] = [tstar[ista]]
             saving[sta][icase]['error'] = [error[ista]]
+            string1 = orid+" "+sta+" "+POS.upper()+" "+str(np.log(saving[sta]['corr'][0]))+" "+str(error[ista])
+            tp.errorfl.write(string1+"\n")
+            # print(icase, lnmomen, error[ista])
             saving[sta]['updated_corr'] = [np.exp((np.log(saving[sta]['corr'][0])+saving[sta][icase]['error'][0]))]
+            # print(sta, np.log(saving[sta]['corr'][0]), error[ista], saving[sta]['updated_corr'])
         
         elif POS.upper() == "S":
             if len(saving[sta][icase]) == 0:
@@ -231,6 +244,8 @@ def get_constant_correction(saving, stalst, ORIG, POS, icase, param, allsite):
 
             saving[sta][icase]['tstar'].append(tstar[ista])
             saving[sta][icase]['error'].append(error[ista])
+            # string1 = orid+" "+sta+" "+POS.upper()+" "+str(np.log(saving[sta]['corr'][1]))+" "+str(error[ista])
+            # tp.errorfl.write(string1+"\n")
             if 'updated_corr' not in saving[sta]:
                 saving[sta]['updated_corr'] = [1]
             
@@ -363,9 +378,9 @@ def output_results(orid, stalst, POS, param, ORIG, saving, ARRIV, allsite):
                     lnM = np.log(ORIG['mo'][0])
                     tstarsub.plotspec(saving, param, ARRIV[sta], orid, 'P', lnM, ORIG['fc'], param['alpha'], 4, allsite)
         
-        for sta in stalst:
-            sitefl = tp.resultdir+"/site/%s_Presspec_%s.dat" %(orid, sta)
-            np.savetxt(sitefl, saving[sta][4]['Presspec'], fmt='%10.4f %15.8e %6.2f')
+        # for sta in stalst:
+        #     sitefl = tp.resultdir+"/site/%s_Presspec_%s.dat" %(orid, sta)
+        #     np.savetxt(sitefl, saving[sta][4]['Presspec'], fmt='%10.4f %15.8e %6.2f')
                 
     elif POS.upper() == "S":
         ftstar = open(tp.resultdir+'/%s_sstar%03d.dat' % (orid, int(param['alpha']*100)),'w')
@@ -395,8 +410,8 @@ def output_results(orid, stalst, POS, param, ORIG, saving, ARRIV, allsite):
                     lnM = np.log(ORIG['mo'][1])
                     tstarsub.plotspec(saving, param, ARRIV[sta], orid, 'S', lnM, ORIG['fc'], param['alpha'], 4, allsite)
         
-        for sta in stalst:
-            sitefl = tp.resultdir+"/site/%s_Sresspec_%s.dat" %(orid, sta)
-            np.savetxt(sitefl, saving[sta][4]['Sresspec'], fmt='%10.4f %15.8e %6.2f')
+        # for sta in stalst:
+        #     sitefl = tp.resultdir+"/site/%s_Sresspec_%s.dat" %(orid, sta)
+        #     np.savetxt(sitefl, saving[sta][4]['Sresspec'], fmt='%10.4f %15.8e %6.2f')
 
     return

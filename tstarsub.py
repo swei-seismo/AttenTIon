@@ -872,12 +872,26 @@ def plotspec(saving, param, ARRIV, orid, POS, lnmomen, fc, alpha, icase, allsite
             ttS = saving['Stt']
             QpQs = 2.25
             invtstar2 = invtstarP*QpQs*ttS/ttP
-            synspec2 =(updated_corr*np.exp(lnmomen)*np.exp(-np.pi*freqx*(freqx**(-alpha))*invtstar2)/(1+(freqx/fc)**2))
+            synspec2 = (updated_corr*np.exp(lnmomen)*np.exp(-np.pi*freq*(freq**(-alpha))*invtstar2)/(1+(freq/fc)**2))
             QpQs = 1.75
             invtstar2 = invtstarP*QpQs*ttS/ttP
-            synspec3 = (updated_corr*np.exp(lnmomen)*np.exp(-np.pi*freqx*(freqx**(-alpha))*invtstar2)/(1+(freqx/fc)**2))
-            plt.plot(freqx, np.log(synspec2), 'm--', linewidth=2, label='QpQs=2.25')
-            plt.plot(freqx, np.log(synspec3), 'c--', linewidth=2, label='QpQs=1.75')
+            synspec3 = (updated_corr*np.exp(lnmomen)*np.exp(-np.pi*freq*(freq**(-alpha))*invtstar2)/(1+(freq/fc)**2))
+            plt.plot(freq, np.log(synspec2), 'm--', linewidth=2, label='QpQs=2.25')
+            plt.plot(freq, np.log(synspec3), 'c--', linewidth=2, label='QpQs=1.75')
+            
+            syn_spec_file_2 = sta+"_S_175_syn_spec.dat"
+            syn_spec_file_3 = sta+"_S_225_syn_spec.dat"
+            fsynspec2 = open(syn_spec_file_2, "w")
+            fsynspec3 = open(syn_spec_file_3, "w")
+            for i in range(len(freq)):
+                string1 = str(freq[i])+" "+str(np.log(synspec2)[i])
+                fsynspec2.write(string1+"\n")
+                string2 = str(freq[i])+" "+str(np.log(synspec3)[i])
+                fsynspec3.write(string2+"\n")
+            
+            fsynspec2.close()
+            fsynspec3.close()
+
         
         plt.legend(loc='lower left')
         text =  "t* = %.2f\n" %(invtstar) +\
@@ -894,21 +908,40 @@ def plotspec(saving, param, ARRIV, orid, POS, lnmomen, fc, alpha, icase, allsite
         plt.savefig(spec_figure_dir+'/%s_%s_%sspectrum_loglinear.pdf' % (net, sta, POS.upper()))
         
         # Output for plotting
-        if POS.upper() == "P":
-            spec_file = sta+"_signal_spec.dat"
-            n_spec_file = sta+"_noise_spec.dat"
-            syn_spec_file = sta+"_syn_spec.dat"
-            fspec = open(spec_file, "w")
-            fnspec = open(n_spec_file, "w")
-            fsynspec = open(syn_spec_file, "w")
-            for i in range(len(freq)):
-                string1 = str(freq[i])+" "+str(np.log(spec)[i])
-                fspec.write(string1+"\n")
-                string2 = str(freq[i])+" "+str(np.log(n_spec)[i])
-                fnspec.write(string2+"\n")
-                string3 = str(freq[i])+" "+str(np.log(synspec)[i])
-                fsynspec.write(string3+"\n")
+        # if POS.upper() == "P":
+        #     spec_file = sta+"_signal_spec.dat"
+        #     n_spec_file = sta+"_noise_spec.dat"
+        #     syn_spec_file = sta+"_syn_spec.dat"
+        #     fspec = open(spec_file, "w")
+        #     fnspec = open(n_spec_file, "w")
+        #     fsynspec = open(syn_spec_file, "w")
+        #     for i in range(len(freq)):
+        #         string1 = str(freq[i])+" "+str(np.log(spec)[i])
+        #         fspec.write(string1+"\n")
+        #         string2 = str(freq[i])+" "+str(np.log(n_spec)[i])
+        #         fnspec.write(string2+"\n")
+        #         string3 = str(freq[i])+" "+str(np.log(synspec)[i])
+        #         fsynspec.write(string3+"\n")
             
-            fspec.close()
-            fnspec.close()
-            fsynspec.close()
+        #     fspec.close()
+        #     fnspec.close()
+        #     fsynspec.close()
+        
+        # if POS.upper() == "S":
+        #     spec_file = sta+"_S_signal_spec.dat"
+        #     n_spec_file = sta+"_S_noise_spec.dat"
+        #     syn_spec_file = sta+"_S_syn_spec.dat"
+        #     fspec = open(spec_file, "w")
+        #     fnspec = open(n_spec_file, "w")
+        #     fsynspec = open(syn_spec_file, "w")
+        #     for i in range(len(freq)):
+        #         string1 = str(freq[i])+" "+str(np.log(spec)[i])
+        #         fspec.write(string1+"\n")
+        #         string2 = str(freq[i])+" "+str(np.log(n_spec)[i])
+        #         fnspec.write(string2+"\n")
+        #         string3 = str(freq[i])+" "+str(np.log(synspec)[i])
+        #         fsynspec.write(string3+"\n")
+            
+        #     fspec.close()
+        #     fnspec.close()
+        #     fsynspec.close()

@@ -34,9 +34,9 @@ for orid in oridlst[start:end]:
     tp.logfl.write('\nWorking on ORID # %s\n' % orid)
     
     resultfl = tp.resultdir+'/%s_pstar%03d.dat' % (orid, int(param["alpha"]*100))
-    if os.path.isfile(resultfl):
-        print('Skip %s, already exists' % orid)
-        continue
+    # if os.path.isfile(resultfl):
+    #     print('Skip %s, already exists' % orid)
+    #     continue
     
     # Load event and station information
     ORIG = tstar_load.loadORIG(orid, param)
@@ -59,6 +59,9 @@ for orid in oridlst[start:end]:
         
         ## Here a fixed corner frequency is applied
         ORIG = tf.fixed_bestfc(orid, ORIG)
+        # print(ORIG['fc'])
+        # ORIG['fc'] = ORIG['fc']*1.2
+        # print(ORIG['fc'])
     
     if len(staP2lst) <= 5:
         continue
@@ -70,7 +73,7 @@ for orid in oridlst[start:end]:
         continue
 
     ## Get constant correction for each event-station pair
-    saving = tf.get_constant_correction(saving, staP3lst, ORIG, 'P', 3, param, allsite)
+    saving = tf.get_constant_correction(orid, saving, staP3lst, ORIG, 'P', 3, param, allsite)
 
     ## Final inverion for t* value
     (ORIG, saving) = tf.inversion(orid, saving, staP3lst, ORIG, 'P', 4, param, allsite)
@@ -86,7 +89,7 @@ for orid in oridlst[start:end]:
         continue
     
     ## Get constant correction for each event-station pair
-    saving = tf.get_constant_correction(saving, staS3lst, ORIG, 'S', 3, param, allsite)
+    saving = tf.get_constant_correction(orid, saving, staS3lst, ORIG, 'S', 3, param, allsite)
 
     ## Final inverion for tstar value
     (ORIG, saving) = tf.inversion(orid, saving, staS3lst, ORIG, 'S', 4, param, allsite)

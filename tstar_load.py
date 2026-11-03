@@ -5,6 +5,7 @@ import os
 import glob
 import numpy as np
 import tstar_parameters as tp
+import pandas as pd
 
 
 def loadchannels(orid, net, sta):
@@ -117,6 +118,14 @@ def loaddata(param, orid, fldir):
     os.chdir(fldir)
     sacfls = glob.glob("*Z.sac")
     stalst = [sacfl.split(".")[1] for sacfl in sacfls]
+    # print(stalst)
+
+    ### Code for filtering land stations
+    # station_file = "/mnt/research/seismo_wei/ZZhang/tstar_inversion/fixed_fc_with_constant_correction/stations.dat"
+    # df = pd.read_csv(station_file, sep="\s+", header=None, names=["station", "lat", "lon", "elev"])
+    # stalst = [sta for sta in stalst if df.loc[df["station"] == sta, "elev"].values[0] > 0]
+    # print(stalst)
+    ### Code for filtering land stations
     ARRIV = {}
     
     if len(stalst) == 0:

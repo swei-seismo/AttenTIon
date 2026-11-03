@@ -62,7 +62,7 @@ def set_parameters():
         # Time domain parameters
         "WLP": 3.0,         # Window length of P wave signal and corresponding noise
         "WLS": 6.0,         # Window length of S wave signal and corresponding noise
-        "prewin": [0.5,1],  # Window start before arrival
+        "prewin": [0.5, 1],  # Window start before arrival
         "gaps": 0.5,        # Seconds between S noise and signal
         "beta": 4000,       # Shear velocity in m/s for approximating corner frequency
 
@@ -80,7 +80,7 @@ def set_parameters():
 
         "doplotseis": False,
         "doplotsnr": False,
-        "doplotspec": True,
+        "doplotspec": False,
         "plotspecloglog": False,
         "doplotfcts": False,
         "doplotfcall": False,
@@ -112,14 +112,16 @@ def working_dir():
     """
 
     global workdir, sacdir, gsdir, figdir, resultdir, sitedir, figdir1, \
-           figdir2, figdir3, figdir4, figdir5, logfl, fclist, catalog, spectra, fittingfl
+           figdir2, figdir3, figdir4, figdir5, logfl, fclist, catalog, spectra, fittingfl, errorfl
     
     maindir = "/mnt/research/seismo_wei/ZZhang/tstar_inversion"
     sacdir = '/mnt/research/seismo_wei/ZZhang/tstar_inversion/tstar_data/correctedSeismograms'
+    # sacdir = '/mnt/research/seismo_wei/ZZhang/tstar_inversion/example_data/correctedSeismograms'
     namedir = 'Eventname'
     gsdir = maindir + '/tstar_data/GS'
     catalog = maindir + '/tstar_data/AACSE_catalog.dat'
     spectra = maindir + '/tstar_data/Alaska_events_source_spectra.dat'
+    # spectra = maindir + '/tstar_data/Alaska_EQ_source_spectra_V2.dat'
     
     ## Output
     currentdir = os.getcwd()
@@ -147,6 +149,8 @@ def working_dir():
     fclist = open(workdir + '/bestfc.lst','a')
     fittingfile = workdir + '/fitting.lst'
     fittingfl = open(fittingfile, 'a') 
+    errorfile = workdir + '/error.lst'
+    errorfl = open(errorfile, 'a')
     
     oridlst = []
     forid = open(namedir, 'r')
