@@ -50,39 +50,55 @@ def load_picks(picks_file):
 
 
 def check_single_channel():
-    ## Here we make sure there are 3 channels as input
-    ## For station with only vertical channel, we use the S waveform 
-    ##     on the vertical channel to invert for the S-wave t*
-    cmd = "ls *Z.sac | awk -F '.' '{print $1, $2}'"
-    output = subprocess.check_output(cmd, shell=True, text=True).strip()
-    lines = output.split("\n")
+    """Complete one- or two-component records without replacing real channels."""
+    station_files = {}
+    for sacfile in glob.glob("*.sac"):
+        parts = Path(sacfile).name.split(".")
+        if len(parts) != 4:
+            print(f"Skipping unexpected SAC filename: {sacfile}")
+            continue
+        net, sta, chan, _ = parts
+        station_files.setdefault((net, sta), []).append((sacfile, chan))
+
     sac_commands = ""
-    for line in lines:
-        line = line.strip()
-        parts = line.split()
-        net = parts[0]
-        sta = parts[1]
-        lst = glob.glob(f"{net}.{sta}.*.sac")
-        if len(lst) == 3:
+    opposite = {"E": "N", "N": "E", "1": "2", "2": "1"}
+    for (net, sta), files in sorted(station_files.items()):
+        if len(files) == 3:
             continue
 
-        if len(lst) == 2:
-            print(net, sta)
+        verticals = [(sacfile, chan) for sacfile, chan in files
+                     if chan.endswith("Z")]
+        if len(files) == 2 and not verticals:
+            for sacfile, _ in files:
+                os.remove(sacfile)
+                txtfile = Path(sacfile).with_suffix(".txt")
+                if txtfile.exists():
+                    txtfile.unlink()
+            print(f"Removed horizontal-only record: {net}.{sta}")
+            continue
 
-        ## Only vertical channel exists
-        for sacfile in lst:
-            chan = sacfile.split(".")[2]
-            new_chan1 = chan[:-1]+"E"
-            new_sacfile1 = f"{net}.{sta}.{new_chan1}.sac"
-            sac_commands += f"read {sacfile}\n"
-            sac_commands += f"ch KCMPNM {new_chan1}\n"
-            sac_commands += f"w {new_sacfile1}\n"
+        if len(files) == 1 and len(verticals) == 1:
+            source, zchan = verticals[0]
+            new_channels = (zchan[:-1] + "E", zchan[:-1] + "N")
+        elif len(files) == 2 and len(verticals) == 1:
+            source, hchan = next((sacfile, chan) for sacfile, chan in files
+                                 if not chan.endswith("Z"))
+            if (hchan[:-1] != verticals[0][1][:-1]
+                    or hchan[-1] not in opposite):
+                print(f"Skipping incompatible channel pair: {net}.{sta} "
+                      f"({', '.join(chan for _, chan in files)})")
+                continue
+            new_channels = (hchan[:-1] + opposite[hchan[-1]],)
+        else:
+            print(f"Skipping unsupported channel count: {net}.{sta} "
+                  f"({', '.join(chan for _, chan in files)})")
+            continue
 
-            new_chan2 = chan[:-1]+"N"
-            new_sacfile2 = f"{net}.{sta}.{new_chan2}.sac"
-            sac_commands += f"read {sacfile}\n"
-            sac_commands += f"ch KCMPNM {new_chan2}\n"
-            sac_commands += f"w {new_sacfile2}\n"
+        for new_chan in new_channels:
+            new_sacfile = f"{net}.{sta}.{new_chan}.sac"
+            sac_commands += f"read {source}\n"
+            sac_commands += f"ch KCMPNM {new_chan}\n"
+            sac_commands += f"w {new_sacfile}\n"
     
     if sac_commands:
         sac_commands += "q \n"
@@ -147,6 +163,8 @@ def add_sac_headers(sac_z_files, event_id, catalog_dict, picks_dict):
 
 
 def check_and_remove_no_P_arrival():
+    if not glob.glob("*.sac"):
+        return
     cmd = "saclst t0 f *.sac"
     output = subprocess.check_output(cmd, shell=True, text=True).strip()
     for line in output.split('\n'):
